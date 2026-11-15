@@ -8,17 +8,31 @@ from functools import wraps
 
 app = Flask(__name__)
 
+# Security configuration
 app.config["SECRET_KEY"] = os.environ.get(
     "SECRET_KEY",
     "taskflow-development-secret-key-2026"
 )
 
+# Frontend URL
+FRONTEND_URL = os.environ.get(
+    "FRONTEND_URL",
+    "http://localhost:5173"
+)
+
+# Configure CORS for local and deployed frontend
+allowed_origins = [
+    "http://localhost:5173",
+    FRONTEND_URL
+]
+
 CORS(
     app,
     supports_credentials=True,
-    origins=["http://localhost:5173"]
+    origins=allowed_origins
 )
 
+# SQLite database configuration
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATABASE = os.path.join(BASE_DIR, "taskflow.db")
 
@@ -321,7 +335,10 @@ def update_task(task_id):
         }), 404
 
     title = data.get("title", existing_task["title"]).strip()
-    description = data.get("description", existing_task["description"]).strip()
+    description = data.get(
+        "description",
+        existing_task["description"]
+    ).strip()
     priority = data.get("priority", existing_task["priority"])
     status = data.get("status", existing_task["status"])
     due_date = data.get("due_date", existing_task["due_date"]) or None
@@ -417,4 +434,11 @@ def health():
 
 if __name__ == "__main__":
     initialize_database()
-    app.run(debug=True, port=5000)
+
+    port = int(os.environ.get("PORT", 5000))
+
+    app.run(
+        host="0.0.0.0",
+        port=port,
+        debug=False
+    )
