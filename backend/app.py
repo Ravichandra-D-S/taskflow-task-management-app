@@ -20,6 +20,12 @@ FRONTEND_URL = os.environ.get(
     "http://localhost:5173"
 )
 
+# Session cookie configuration
+# Required when the frontend and backend are hosted on different domains.
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "None"
+app.config["SESSION_COOKIE_SECURE"] = True
+
 # Configure CORS for local and deployed frontend
 allowed_origins = [
     "http://localhost:5173",
